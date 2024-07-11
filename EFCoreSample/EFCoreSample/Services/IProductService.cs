@@ -1,6 +1,7 @@
 ﻿using EFCoreSample.DbContext;
 using EFCoreSample.Models;
 using EFCoreSample.Models.Request;
+using EFCoreSample.Models.Response;
 
 namespace EFCoreSample.Services;
 
@@ -12,7 +13,7 @@ public interface IProductService
 
     public bool RemoveProduct(Guid id);
     
-    public List<Product> GetAllProducts();
+    public List<GetProductResponse> GetAllProducts();
 
-    public Product GetProduct(Guid id);
+    public GetProductResponse GetProduct(Guid id);
 }
