@@ -16,13 +16,16 @@ public class ApiResponseActionFilter : IResultFilter
                 : ApiResponseStatus.Fail;
             
             var data = objectResult.StatusCode == StatusCodes.Status200OK ? objectResult.Value : null;
-            var error = objectResult.StatusCode == StatusCodes.Status400BadRequest ? objectResult.Value : null;
+
+            var error = objectResult.StatusCode == StatusCodes.Status400BadRequest
+                ? new List<string> { objectResult.Value.ToString() }
+                : null;
             var apiResponse = new ApiResponse<object>
             {
                 Status = apiResponseStatus,
                 Message = apiResponseStatus.GetDescription(),
                 Data = data,
-                Errors = new List<string> { error.ToString() }
+                Errors = error
             };
             var result = new ObjectResult(apiResponse)
             {

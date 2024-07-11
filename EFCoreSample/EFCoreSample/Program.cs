@@ -5,6 +5,7 @@ using System.Security.Cryptography.Xml;
 using System.Text;
 using System.Threading.RateLimiting;
 using EFCoreSample.ActionFilter;
+using EFCoreSample.DbContext;
 using EFCoreSample.Interceptor;
 using EFCoreSample.Jwt;
 using EFCoreSample.Middleware;
@@ -16,6 +17,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -40,9 +42,9 @@ public class Program
         builder.Services.Configure<ApiBehaviorOptions>(item => item.SuppressModelStateInvalidFilter = true);
         // swagger document spec 
         builder.Services.AddCustomSwaggerGen();
-        builder.Services.AddSingleton<IProductService, ProductService>();
-        builder.Services.AddSingleton<IUserService, UserService>();
-        builder.Services.AddSingleton<JwtTokenGenerator>();
+        builder.Services.AddScoped<IProductService, ProductService>();
+        builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<JwtTokenGenerator>();
         
         // jwt authentication setting
         builder.Services.AddCustomJwtAuthentication(builder.Configuration);
@@ -57,6 +59,10 @@ public class Program
         // http logging
         builder.Services.AddCustomHttpLogging();
         builder.Services.AddHttpLoggingInterceptor<HttpLoggingInterceptor>();
+        
+        // Db Context
+        builder.Services.AddDbContext<EFcoreSampleContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreSampleConnectionString")));
+        
         
         var app = builder.Build();
         app.UseMiddleware<ExceptionMiddleware>();
