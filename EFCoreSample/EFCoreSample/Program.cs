@@ -44,6 +44,7 @@ public class Program
         builder.Services.AddCustomSwaggerGen();
         builder.Services.AddScoped<IProductService, ProductService>();
         builder.Services.AddScoped<IUserService, UserService>();
+        builder.Services.AddScoped<IOrderService, OrderService>();
         builder.Services.AddScoped<JwtTokenGenerator>();
         
         // jwt authentication setting
@@ -61,7 +62,10 @@ public class Program
         builder.Services.AddHttpLoggingInterceptor<HttpLoggingInterceptor>();
         
         // Db Context
-        builder.Services.AddDbContext<EFcoreSampleContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreSampleConnectionString")));
+        builder.Services.AddDbContext<EFcoreSampleContext>(options =>
+        {
+            options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreSampleConnectionString"));
+        });
         
         
         var app = builder.Build();
