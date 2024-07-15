@@ -1,5 +1,7 @@
 ﻿using System.Security.Claims;
+using EFCoreSample.Models.Enum;
 using EFCoreSample.Models.Request;
+using EFCoreSample.Models.Response;
 using EFCoreSample.Services;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -35,13 +37,14 @@ public class OrderController : ControllerBase
         var userId = base.HttpContext.User.Claims.FirstOrDefault(item => item.Type == ClaimTypes.NameIdentifier);
         if (userId == null)
         {
-            return BadRequest("找不到使用者ID");
+            return BadRequest(new ApiResponse<object>(ApiResponseStatus.UserNotFound));
         }
         var isSuccess = _orderService.AddOrder(addOrderRequest, Guid.Parse(userId.Value));
         if (!isSuccess)
         {
-            return BadRequest("成立訂單失敗");
+            return BadRequest(new ApiResponse<object>(ApiResponseStatus.AddOrderFail));
         }
+
         return Ok(isSuccess);
 
     }
@@ -53,10 +56,12 @@ public class OrderController : ControllerBase
         var userId = base.HttpContext.User.Claims.FirstOrDefault(item => item.Type == ClaimTypes.NameIdentifier);
         if (userId == null)
         {
-            return BadRequest("找不到使用者ID");
+            return BadRequest(new ApiResponse<object>(ApiResponseStatus.UserNotFound));
         }
         var orderDetails = _orderService.GetOrderDetails(Guid.Parse(userId.Value));
-        return Ok(orderDetails);
-
+        return Ok(new ApiResponse<IEnumerable<GetOrderDetailsResponse>>(ApiResponseStatus.Success)
+        {
+            Data = orderDetails
+        });
     }
 }
