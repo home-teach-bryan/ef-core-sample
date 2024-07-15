@@ -1,10 +1,12 @@
 using EFCoreSample.ActionFilter;
 using EFCoreSample.DbContext;
+using EFCoreSample.Jobs;
 using EFCoreSample.Jwt;
 using EFCoreSample.Middleware;
 using EFCoreSample.Models;
 using EFCoreSample.ServiceCollection;
 using EFCoreSample.Services;
+using Hangfire;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -56,8 +58,17 @@ public class Program
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("EFCoreSampleConnectionString"));
             });
+            
+            // hangfire
+            builder.Services.AddHangfire(option => option.UseInMemoryStorage());
+            builder.Services.AddHangfireServer();
+            builder.Services.AddSingleton<HangFireJobManager>();
 
             var app = builder.Build();
+            
+            var jobManager = app.Services.GetRequiredService<HangFireJobManager>();
+            jobManager.RegisterJobs();
+            
             app.UseMiddleware<ExceptionMiddleware>();
             app.UseCustomHealthCheck();
 
@@ -67,7 +78,7 @@ public class Program
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
-
+            app.UseHangfireDashboard("/hangfire");
             app.UseHttpsRedirection();
             app.UseSerilogRequestLogging();
             app.UseMiddleware<HttpLoggingMiddleware>();
